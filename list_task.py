@@ -17,15 +17,13 @@ def linear_merge(lst1, lst2):
          while (i<len(lst1) and lst1[i]<=lst2[j]):
             s.append(lst1[i])
             i=i+1
-         while (j<len(lst2) and lst1[i]>=lst2[j]):
+         while (j<len(lst2) and i<len(lst1) and lst1[i]>=lst2[j]):
             s.append(lst2[j])
             j=j+1
     if(i==len(lst1)and j!=len(lst2)):
-        for p in range(j,len(lst2)):
-            s.append(lst2[p])
+        s.extend(lst2[j:])
     if(i!=len(lst1)and j==len(lst2)):
-        for p in range(i,len(lst1)):
-            s.append(lst1[p])
+        s.extend(lst1[i:])
             
     return s
 
