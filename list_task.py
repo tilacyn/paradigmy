@@ -1,12 +1,14 @@
 def remove_adjacent(s):
+    s1[]
     i=0
+    s1.append(s[0])
     while (i<len(s)):
-        if(s[i]==s[i-1]):
-            s.pop(i)
+        if(s[i]!=s[i-1]):
+            s1.append(s[i])
         i=i+1
             
             
-    return s
+    return s1
 
 
 def linear_merge(lst1, lst2):
@@ -14,15 +16,16 @@ def linear_merge(lst1, lst2):
     i=0
     j=0
     while(i<len(lst1) and j<len(lst2)):
-         while (i<len(lst1) and lst1[i]<=lst2[j]):
-            s.append(lst1[i])
-            i=i+1
-         while (j<len(lst2) and i<len(lst1) and lst1[i]>=lst2[j]):
+        if(lst2[j]<lst1[i]):
             s.append(lst2[j])
             j=j+1
-    if(i==len(lst1)and j!=len(lst2)):
+        else:
+            s.append(lst1[i])
+            i=i+1
+            
+    if(i==len(lst1)):
         s.extend(lst2[j:])
-    if(i!=len(lst1)and j==len(lst2)):
+    else:
         s.extend(lst1[i:])
             
     return s
