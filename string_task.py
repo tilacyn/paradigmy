@@ -10,18 +10,12 @@ def verbing(s):
 
 
 def not_bad(s):
-    boo=foo=0
-    for i in range (0, len(s)-3):
-        if(s[i:i+3]=='not' and not boo):
-            p=i
-            boo=1
-        if(s[i:i+3]=='bad' and boo):
-            d=i
-            foo=1
-            break;
-    if(foo):
-        s=s[:p]+'good'+s[(d+3):]
-    return s
+    x=s.find('not')
+    y=s.find('bad')
+    if(x>=0 and y>=0 and x<y)
+      return s[:x]+'good'+s[y+3:]
+    else
+      return s
 
 
 def front_back(a,b):
