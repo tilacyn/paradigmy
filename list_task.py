@@ -1,6 +1,6 @@
 def remove_adjacent(s):
     s1[]
-    i=0
+    i=1
     s1.append(s[0])
     while (i<len(s)):
         if(s[i]!=s[i-1]):
