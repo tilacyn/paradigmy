@@ -10,7 +10,6 @@ def rec(a,b):
     if(w==2):
         return np.dot(a,b)
     else:
-        a11=b11=a12=a21=a22=b21=b22=b12=a22=np.zeros([r,r],int)
         a11=a[:r,:r]
         a12=a[:r,r:]
         a21=a[r:,:r]
