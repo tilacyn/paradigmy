@@ -38,8 +38,8 @@ def product(a, b):
 
 n = int(input())
 n_padded = extend_to_power_of_two(n)
-b = np.zeros((n_padded, n_padded), int)
 a = np.zeros((n_padded, n_padded), int)
+b = np.zeros((n_padded, n_padded), int)
 for i in range(n):
     a[i, :n] = list(map(int, input().split()))
 for i in range(n):
