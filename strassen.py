@@ -46,3 +46,4 @@ for i in range(n):
     b[i, :n] = list(map(int, input().split()))
 for row in product(a, b)[:n, :n]:
     print (*row)
+
