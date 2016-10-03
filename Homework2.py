@@ -23,7 +23,6 @@ def dublicate(Directory):
     return dic
 
 Directory = input()
-
 dic = dublicate(Directory)
 for key in dic:
     if len(dic[key]) > 1:
