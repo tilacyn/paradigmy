@@ -1,6 +1,7 @@
 import os
 import sys
 import hashlib
+import collections
 
 
 def hash_file(file_name):
@@ -11,16 +12,13 @@ def hash_file(file_name):
 
 
 def seek_for_duplicates(Directory):
-    dic = {}
+    dic = collections.defaultdict(list)
     for roots, dirs, files in os.walk(Directory):
         for f in files:
             path = os.path.join(roots, f)
             h = hash_file(path)
             if not os.path.islink(path) and not f.startswith('.' or '~'):
-                if h in dic:
-                    dic[h].extend([f])
-                else:
-                    dic[h] = [f]
+                dic[h].extend([f])
     return dic
 
 Directory = input()
