@@ -13,9 +13,9 @@ def hash_file(file_name):
 
 def search_for_duplicates(directory):
     hash_to_files = collections.defaultdict(list)
-    for roots, _, files in os.walk(directory):
+    for path_to_catalogue, _, files in os.walk(directory):
             for f in files:
-                temp = os.path.join(roots, f)
+                temp = os.path.join(path_to_catalogue, f)
                 absolute_path = os.path.abspath(temp)
                 if not f.startswith(('.', '~')) and not os.path.islink(absolute_path):
                     h = hash_file(absolute_path)
