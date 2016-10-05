@@ -11,18 +11,18 @@ def hash_file(file_name):
     return h.hexdigest()
 
 
-def seek_for_duplicates(Directory):
+def search_for_duplicates(directory):
     dic = collections.defaultdict(list)
-    for roots, dirs, files in os.walk(Directory):
-        for f in files:
-            path = os.path.join(roots, f)
-            h = hash_file(path)
-            if not os.path.islink(path) and not f.startswith('.' or '~'):
-                dic[h].extend([f])
+    for roots, _, files in os.walk(directory):
+            for f in files:
+                path = os.path.join(roots, f)
+                h = hash_file(path)
+                if not os.path.islink(path) and not f.startswith(('.', '~')):
+                    dic[h].append(path)
     return dic
 
-Directory = input()
-dic = seek_for_duplicates(Directory)
+directory = sys.argv[1]
+dic = search_for_duplicates(directory)
 for value in dic.values():
-    if(len(value) > 1):
+    if len(value) > 1:
         print(*value, sep=':')
