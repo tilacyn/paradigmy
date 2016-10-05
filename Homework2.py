@@ -13,11 +13,12 @@ def hash_file(file_name):
 
 def search_for_duplicates(directory):
     hash_to_files = collections.defaultdict(list)
-    for roots, _, files in os.walk(directory):
+    for path_from_dir_to_file, _, files in os.walk(directory):
             for f in files:
-                path = os.path.join(directory, roots, f)
-                h = hash_file(path)
+                temp = os.path.join(path_from_dir_to_file, f)
+                path = os.path.abspath(temp)
                 if not f.startswith(('.', '~')) and not os.path.islink(path):
+                    h = hash_file(path)
                     hash_to_files[h].append(path)
     return hash_to_files
 
