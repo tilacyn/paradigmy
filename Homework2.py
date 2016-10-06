@@ -16,9 +16,10 @@ def search_for_duplicates(top_dir):
     for cur_dir, _, files in os.walk(top_dir):
             for f in files:
                 absolute_path = os.path.abspath(os.path.join(cur_dir, f))
-                if not f.startswith(('.', '~')) and not os.path.islink(absolute_path):
-                    h = hash_file(absolute_path)
-                    hash_to_files[h].append(absolute_path)
+                if (not f.startswith(('.', '~')) and
+                        not os.path.islink(absolute_path)):
+                        h = hash_file(absolute_path)
+                        hash_to_files[h].append(absolute_path)
     return hash_to_files
 
 directory = sys.argv[1]
