@@ -22,6 +22,7 @@ def search_for_duplicates(top_dir):
                         hash_to_files[h].append(absolute_path)
     return hash_to_files
 
+
 directory = sys.argv[1]
 hash_to_files = search_for_duplicates(directory)
 for files in hash_to_files.values():
