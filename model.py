@@ -56,12 +56,12 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false == None:
+            if self.if_false is None:
                 return Number(0)
             else:
                 return self.if_false[- 1].evaluate(scope)
         else:
-            if self.if_true == None:
+            if self.if_true is None:
                 return Number(0)
             else:
                 return self.if_true[- 1].evaluate(scope)
