@@ -167,7 +167,7 @@ class UnaryOperation:
         if self.op == '-':
             return Number(-self.expr)
         if self.op == '!':
-            return Number(not self.expr)
+            return Number(int(not self.expr))
 
 
 def example():
