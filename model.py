@@ -31,6 +31,8 @@ class Function:
         self.body = body
 
     def evaluate(self, scope):
+        if not self.body:
+            return Number(0)
         for smth in self.body:
             t = smth.evaluate(scope)
         return t
@@ -56,15 +58,19 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false is None:
+            if self.if_false is None or not self.if_false:
                 return Number(0)
             else:
-                return self.if_false[- 1].evaluate(scope)
+                for i in self.if_false:
+                    res = i.evaluate(scope)
+                return res
         else:
-            if self.if_true is None:
+            if self.if_true is None or not self.if_true:
                 return Number(0)
             else:
-                return self.if_true[- 1].evaluate(scope)
+                for i in self.if_true:
+                    res = i.evaluate(scope)
+                return res
 
 
 class Print:
@@ -73,8 +79,9 @@ class Print:
         self.expr = expr
 
     def evaluate(self, scope):
-        print(self.expr.evaluate(scope).value)
-        return self.expr
+        print_number = self.expr.evaluate(scope)
+        print(print_number.value)
+        return print_number
 
 
 class Read:
@@ -97,8 +104,8 @@ class FunctionCall:
     def evaluate(self, scope):
         function = self.fun_expr.evaluate(scope)
         call_scope = Scope(scope)
-        for i in zip(function.args, self.args):
-            call_scope[i[0]] = i[1].evaluate(scope)
+        for i, j in zip(function.args, self.args):
+            call_scope[i] = j.evaluate(scope)
         return function.evaluate(call_scope)
 
 
@@ -132,45 +139,21 @@ class BinaryOperation:
         if self.op == '/':
             return Number(lhs // rhs)
         if self.op == '&&':
-            if lhs == 0 or rhs == 0:
-                return Number(0)
-            else:
-                return Number(1)
+            return Number(lhs and rhs)
         if self.op == '||':
-            if lhs == 0 and rhs == 0:
-                return Number(0)
-            else:
-                return Number(1)
+            return Number(rhs or lhs)
         if self.op == '>':
-            if(lhs > rhs):
-                return Number(lhs - rhs)
-            else:
-                return Number(0)
+            return Number(lhs > rhs)
         if self.op == '<':
-            if(lhs < rhs):
-                return Number(rhs - lhs)
-            else:
-                return Number(0)
+            return Number(lhs < rhs)
         if self.op == '>=':
-            if(lhs >= rhs):
-                return Number(lhs - rhs + 1)
-            else:
-                return Number(0)
+            return Number(lhs >= rhs)
         if self.op == '<=':
-            if(lhs <= rhs):
-                return Number(rhs - lhs + 1)
-            else:
-                return Number(0)
+            return Number(lhs <= rhs)
         if self.op == '==':
-            if(lhs == rhs):
-                return Number(1)
-            else:
-                return Number(0)
+            return Number(lhs == rhs)
         if self.op == '!=':
-            if(lhs != rhs):
-                return Number(1)
-            else:
-                return Number(0)
+            return Number(not(lhs == rhs))
 
 
 class UnaryOperation:
@@ -184,10 +167,7 @@ class UnaryOperation:
         if self.op == '-':
             return Number(-self.expr)
         if self.op == '!':
-            if self.expr == 0:
-                return Number(1)
-            else:
-                return Number(0)
+            return Number(not self.expr)
 
 
 def example():
@@ -200,7 +180,7 @@ def example():
     scope = Scope(parent)
     assert 10 == scope["bar"].value
     scope['bar'] = Number(20)
-    assert scope["bar"].value == 20
+    assert scope['bar'].value == 20
     print('It should print 2: ', end=' ')
     FunctionCall(FunctionDefinition('foo', parent['foo']),
                  [Number(5), UnaryOperation('-', Number(3))]).evaluate(scope)
@@ -217,7 +197,7 @@ def example1():
 
 def example2():
     print('It should read arg1, arg2')
-    print('It should print (arg1//arg2)*(arg1%arg2):')
+    print('It should print arg1//arg2, arg1%arg2, (arg1//arg2)*(arg1%arg2):')
     parent = Scope()
     d = BinaryOperation(Reference('arg1'), '/', Reference('arg2'))
     t = BinaryOperation(Reference('arg1'), '%', Reference('arg2'))
@@ -229,7 +209,26 @@ def example2():
     FunctionCall(Reference('/%'), [parent['1'], parent['2']]).evaluate(parent)
 
 
+def example3():
+    print('It should print x-1, x-2, x-3, if x <= 5')
+    print('Otherwise it should print 1-x, 2-x, 3-x')
+    parent = Scope()
+    Read('arg1').evaluate(parent)
+    Conditional(BinaryOperation(Reference('arg1'), '>', Number(5)),
+                [Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
+                                                           '-', Number(1)))),
+                 Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
+                                                           '-', Number(2)))),
+                 Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
+                                                           '-', Number(3))))],
+                [Print(BinaryOperation(Reference('arg1'), '-', Number(1))),
+                 Print(BinaryOperation(Reference('arg1'), '-', Number(2))),
+                 Print(BinaryOperation(Reference('arg1'),
+                       '-', Number(3)))]).evaluate(parent)
+
+
 if __name__ == '__main__':
     example()
     example1()
     example2()
+    example3()
