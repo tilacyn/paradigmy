@@ -163,11 +163,11 @@ class UnaryOperation:
         self.expr = expr
 
     def evaluate(self, scope):
-        self.expr = self.expr.evaluate(scope).value
+        cur_val = self.expr.evaluate(scope).value
         if self.op == '-':
-            return Number(-self.expr)
+            return Number(-cur_val)
         if self.op == '!':
-            return Number(int(not self.expr))
+            return Number(int(not cur_val))
 
 
 def example():
