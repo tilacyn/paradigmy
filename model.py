@@ -103,8 +103,8 @@ class FunctionCall:
     def evaluate(self, scope):
         function = self.fun_expr.evaluate(scope)
         call_scope = Scope(scope)
-        for f_arg, call_arg in zip(function.args, self.args):
-            call_scope[f_arg] = call_arg.evaluate(scope)
+        for arg_name, arg_value in zip(function.args, self.args):
+            call_scope[arg_name] = arg_value.evaluate(scope)
         return function.evaluate(call_scope)
 
 
@@ -232,7 +232,7 @@ def example4():
     parent['a1'] = Number(4)
     parent['a2'] = Number(3)
     assert Print(BinaryOperation(Reference('a1'), '+',
-                                 Reference('a2'))).evaluate(parent).value == 4
+                                 Reference('a2'))).evaluate(parent).value == 7
     assert Print(BinaryOperation(Reference('a1'), '-',
                                  Reference('a2'))).evaluate(parent).value == 1
     assert Print(BinaryOperation(Reference('a1'), '*',
@@ -258,7 +258,7 @@ def example4():
     assert Print(BinaryOperation(Reference('a1'), '%',
                                  Reference('a2'))).evaluate(parent).value == 1
 
-    
+
 def example5():
     print('checks whether program is valid with None or empty args')
     parent = Scope()
@@ -266,6 +266,9 @@ def example5():
     Function([Number(0)], None).evaluate(parent)
     Conditional(Number(0), [], []).evaluate(parent)
     Conditional(Number(0), None, None).evaluate(parent)
+    Conditional(Number(0), []).evaluate(parent)
+    Conditional(Number(0), None).evaluate(parent)
+
 
 if __name__ == '__main__':
     example()
