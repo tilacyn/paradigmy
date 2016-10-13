@@ -2,8 +2,7 @@ class Scope:
 
     def __init__(self, parent=None):
         self.parent = parent
-        dic = {}
-        self.dic = dic
+        self.dic = {}
 
     def __getitem__(self, name):
         if self.dic.get(name):
@@ -33,9 +32,9 @@ class Function:
     def evaluate(self, scope):
         if not self.body:
             return Number(0)
-        for smth in self.body:
-            t = smth.evaluate(scope)
-        return t
+        for stmt in self.body:
+            res = stmt.evaluate(scope)
+        return res
 
 
 class FunctionDefinition:
@@ -58,18 +57,18 @@ class Conditional:
 
     def evaluate(self, scope):
         if self.condition.evaluate(scope).value == 0:
-            if self.if_false is None or not self.if_false:
+            if not self.if_false:
                 return Number(0)
             else:
-                for i in self.if_false:
-                    res = i.evaluate(scope)
+                for stmt in self.if_false:
+                    res = stmt.evaluate(scope)
                 return res
         else:
-            if self.if_true is None or not self.if_true:
+            if not self.if_true:
                 return Number(0)
             else:
-                for i in self.if_true:
-                    res = i.evaluate(scope)
+                for stmt in self.if_true:
+                    res = stmt.evaluate(scope)
                 return res
 
 
@@ -104,8 +103,8 @@ class FunctionCall:
     def evaluate(self, scope):
         function = self.fun_expr.evaluate(scope)
         call_scope = Scope(scope)
-        for i, j in zip(function.args, self.args):
-            call_scope[i] = j.evaluate(scope)
+        for f_arg, call_arg in zip(function.args, self.args):
+            call_scope[f_arg] = call_arg.evaluate(scope)
         return function.evaluate(call_scope)
 
 
@@ -139,21 +138,21 @@ class BinaryOperation:
         if self.op == '/':
             return Number(lhs // rhs)
         if self.op == '&&':
-            return Number(lhs and rhs)
+            return Number(int(lhs and rhs))
         if self.op == '||':
-            return Number(rhs or lhs)
+            return Number(int(rhs or lhs))
         if self.op == '>':
-            return Number(lhs > rhs)
+            return Number(int(lhs > rhs))
         if self.op == '<':
-            return Number(lhs < rhs)
+            return Number(int(lhs < rhs))
         if self.op == '>=':
-            return Number(lhs >= rhs)
+            return Number(int(lhs >= rhs))
         if self.op == '<=':
-            return Number(lhs <= rhs)
+            return Number(int(lhs <= rhs))
         if self.op == '==':
-            return Number(lhs == rhs)
+            return Number(int(lhs == rhs))
         if self.op == '!=':
-            return Number(not(lhs == rhs))
+            return Number(int(not lhs == rhs))
 
 
 class UnaryOperation:
@@ -178,7 +177,7 @@ def example():
                                                     Reference('world')))])
     parent['bar'] = Number(10)
     scope = Scope(parent)
-    assert 10 == scope["bar"].value
+    assert 10 == scope['bar'].value
     scope['bar'] = Number(20)
     assert scope['bar'].value == 20
     print('It should print 2: ', end=' ')
@@ -227,8 +226,51 @@ def example3():
                        '-', Number(3)))]).evaluate(parent)
 
 
+def example4():
+    print('It should print all the Binary operations')
+    parent = Scope()
+    Read('arg1').evaluate(parent)
+    Read('arg1').evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '+',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '-',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '*',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '/',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '>',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '<',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '>=',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '<=',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '&&',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '||',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '!=',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '==',
+                          Reference('arg2'))).evaluate(parent)
+    Print(BinaryOperation(Reference('arg1'), '%',
+                          Reference('arg2'))).evaluate(parent)
+
+
+def example5():
+    print('checks whether program is valid with None or empty args')
+    parent = Scope()
+    Function([Number(0)], []).evaluate(parent)
+    Function([Number(0)], None).evaluate(parent)
+    Conditional(Number(0), [], []).evaluate(parent)
+    Conditional(Number(0), None, None).evaluate(parent)
+
 if __name__ == '__main__':
     example()
     example1()
     example2()
     example3()
+    example4()
+    example5()
