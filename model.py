@@ -266,8 +266,8 @@ def example5():
     Function([Number(0)], None).evaluate(parent)
     Conditional(Number(0), [], []).evaluate(parent)
     Conditional(Number(0), None, None).evaluate(parent)
-    Conditional(Number(0), []).evaluate(parent)
-    Conditional(Number(0), None).evaluate(parent)
+    Conditional(Number(1), []).evaluate(parent)
+    Conditional(Number(1), None).evaluate(parent)
 
 
 if __name__ == '__main__':
