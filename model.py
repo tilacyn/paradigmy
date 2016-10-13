@@ -229,36 +229,36 @@ def example3():
 def example4():
     print('It should print all the Binary operations')
     parent = Scope()
-    Read('arg1').evaluate(parent)
-    Read('arg1').evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '+',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '-',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '*',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '/',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '>',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '<',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '>=',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '<=',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '&&',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '||',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '!=',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '==',
-                          Reference('arg2'))).evaluate(parent)
-    Print(BinaryOperation(Reference('arg1'), '%',
-                          Reference('arg2'))).evaluate(parent)
+    parent['a1'] = Number(4)
+    parent['a2'] = Number(3)
+    assert Print(BinaryOperation(Reference('a1'), '+',
+                                 Reference('a2'))).evaluate(parent).value == 4
+    assert Print(BinaryOperation(Reference('a1'), '-',
+                                 Reference('a2'))).evaluate(parent).value == 1
+    assert Print(BinaryOperation(Reference('a1'), '*',
+                                 Reference('a2'))).evaluate(parent).value == 12
+    assert Print(BinaryOperation(Reference('a1'), '/',
+                                 Reference('a2'))).evaluate(parent).value == 1
+    assert Print(BinaryOperation(Reference('a1'), '>',
+                                 Reference('a2'))).evaluate(parent).value == 1
+    assert Print(BinaryOperation(Reference('a1'), '<',
+                                 Reference('a2'))).evaluate(parent).value == 0
+    assert Print(BinaryOperation(Reference('a1'), '>=',
+                                 Reference('a2'))).evaluate(parent).value == 1
+    assert Print(BinaryOperation(Reference('a1'), '<=',
+                                 Reference('a2'))).evaluate(parent).value == 0
+    assert Print(BinaryOperation(Reference('a1'), '&&',
+                                 Reference('a2'))).evaluate(parent).value == 3
+    assert Print(BinaryOperation(Reference('a1'), '||',
+                                 Reference('a2'))).evaluate(parent).value == 3
+    assert Print(BinaryOperation(Reference('a1'), '!=',
+                                 Reference('a2'))).evaluate(parent).value == 1
+    assert Print(BinaryOperation(Reference('a1'), '==',
+                                 Reference('a2'))).evaluate(parent).value == 0
+    assert Print(BinaryOperation(Reference('a1'), '%',
+                                 Reference('a2'))).evaluate(parent).value == 1
 
-
+    
 def example5():
     print('checks whether program is valid with None or empty args')
     parent = Scope()
