@@ -14,7 +14,8 @@ class Scope:
         self.dic[name] = val
 
     def accept(self, visitor):
-        print(self.value,';')
+        print(self.value, ';')
+
 
 class Number:
 
@@ -43,6 +44,8 @@ class Function:
 
     def accept(self, visitor):
         visitor.visit_function(self)
+
+
 class FunctionDefinition:
 
     def __init__(self, name, function):
@@ -55,6 +58,7 @@ class FunctionDefinition:
 
     def accept(self, visitor):
         visitor.visit_f_def(self)
+
 
 class Conditional:
 
@@ -82,6 +86,7 @@ class Conditional:
     def accept(self, visitor):
         visitor.visit_conditional(self)
 
+
 class Print:
 
     def __init__(self, expr):
@@ -94,6 +99,7 @@ class Print:
 
     def accept(self, visitor):
         visitor.visit_print(self)
+
 
 class Read:
 
@@ -122,6 +128,9 @@ class FunctionCall:
             call_scope[arg_name] = arg_value.evaluate(scope)
         return function.evaluate(call_scope)
 
+    def accept(self, visitor):
+        visitor.visit_f_call(self)
+
 
 class Reference:
 
@@ -130,6 +139,9 @@ class Reference:
 
     def evaluate(self, scope):
         return scope[self.name]
+
+    def accept(self, visitor):
+        visitor.visit_ref(self)
 
 
 class BinaryOperation:
@@ -168,6 +180,7 @@ class BinaryOperation:
             return Number(int(lhs == rhs))
         if self.op == '!=':
             return Number(int(not lhs == rhs))
+
     def accept(self, visitor):
         visitor.visit_bin_op(self)
 
@@ -185,54 +198,136 @@ class UnaryOperation:
         if self.op == '!':
             return Number(int(not cur_val))
 
+    def accept(self, visitor):
+        visitor.visit_un_op(self)
+
 
 class PrettyPrinter:
 
     def visit(self, tree):
-        tree.accept(self);
+        tree.accept(self)
 
     def visit_number(self, tree):
-        print (tree.value)
+        print(tree.value, end=';\n')
+
+    def visit_ref(self, tree):
+        print(tree.name, end=';\n')
+
     def visit_conditional(self, tree):
-        print('if', tree.condition, '{')
+        u_p = Ugly_Printer()
+        print('if (', end='')
+        u_p.visit(tree.condition)
+        print(') {', sep='', end='\n')
         for i in tree.if_true:
             self.visit(i)
-        print('}', 'else', '{')
+        print('}', 'else', '{', end='\n')
         for i in tree.if_false:
             self.visit(i)
+        print(end='};\n')
 
-    def visit_function(self, tree):
-        pass 
     def visit_read(self, tree):
-        print('read', tree.name)
+        print('read', tree.name, end='')
+        print(end=';\n')
 
     def visit_f_def(self, tree):
-        print('def')
-        print(tree.args)
-        for i in tree.body:
+        print('def', tree.name, sep=' ', end='')
+        print('(', *tree.function.args, ')', '{', sep='', end='\n')
+        for i in tree.function.body:
             self.visit(i)
+        print(end='};\n')
 
     def visit_bin_op(self, tree):
-        print('(')
-        self.visit(tree.lhs)
-        print(tree.op)
-        self.visit(tree.rhs)
-        print(')')
-        
-    def visit_print(self, tree):
-        print('print')
-        self.visit(tree.expr)
-        
-        
+        print('(', end='')
+        ugly_printer = Ugly_Printer()
+        ugly_printer.visit(tree.lhs)
+        print('', tree.op, end='')
+        ugly_printer.visit(tree.rhs)
+        print(')', end=';\n')
 
-    
-"""
+    def visit_print(self, tree):
+        print('print', end=' ')
+        u_p = Ugly_Printer()
+        u_p.visit(tree.expr)
+        print(end=';\n')
+
+    def visit_un_op(self, tree):
+        print('(', end='')
+        ugly_printer = Ugly_Printer()
+        print(tree.op, end='')
+        ugly_printer.visit(tree.expr)
+        print(')', end=';\n')
+
+    def visit_f_call(self, tree):
+        u_p = Ugly_Printer()
+        u_p.visit(tree.fun_expr)
+        print('(', end='')
+        u_p = Ugly_Printer()
+        count = 0
+        for i in tree.args:
+            u_p.visit(i)
+            if count < len(tree.args) - 1:
+                print(', ', end='')
+            count = count + 1
+        print(')', end='')
+        print(end=';\n')
+
+
+class Ugly_Printer:
+
+    def visit(self, tree):
+        tree.accept(self)
+
+    def visit_number(self, tree):
+        print(tree.value, end='')
+
+    def visit_ref(self, tree):
+        print(tree.name, end='')
+
+    def visit_bin_op(self, tree):
+        print('(', end='')
+        self.visit(tree.lhs)
+        print('', tree.op, end=' ')
+        self.visit(tree.rhs)
+        print(')', end='')
+
+    def visit_un_op(self, tree):
+        print('(', end='')
+        print(tree.op, end='')
+        self.visit(tree.expr)
+        print(')', end='')
+
+    def visit_f_call(self, tree):
+        self.visit(tree.fun_expr)
+        print('(', end='')
+        count = 0
+        for i in tree.args:
+            self.visit(i)
+            if count < len(tree.args) - 1:
+                print(', ', end='')
+            count = count + 1
+        print(')', end='')
+
+"""tests"""
+
 ten = Number(2332536)
 printer = PrettyPrinter()
 printer.visit(ten)
-
-con = Conditional(5>4, [Print(Number(222)), Print(Number(333))], [Print(Number(444)), Print(Number(555))])
+five = Number(5)
+six = Number(6)
+con = Conditional(BinaryOperation(five, '<', six),
+                  [Print(Number(222)),
+                   Print(Number(333))], [Print(Number(444)),
+                                         Print(Number(555))])
 printer.visit(con)
+
+read = Read('x')
+printer = PrettyPrinter()
+printer.visit(read)
+
+number = Number(42)
+unary = UnaryOperation('-', number)
+printer = PrettyPrinter()
+printer.visit(unary)
 
 n0, n1, n2 = Number(1), Number(2), Number(3)
 add = BinaryOperation(n1, '+', n2)
@@ -240,12 +335,19 @@ mul = BinaryOperation(n0, '*', add)
 printer = PrettyPrinter()
 printer.visit(mul)
 
-"""
-function = Function([], [])
+number = Number(42)
+print1 = Print(number)
+printer = PrettyPrinter()
+printer.visit(print1)
+
+
+function = Function([], [Print(Number(222)), Print(Number(333)),
+                         Print(Number(444)), Print(Number(555))])
 definition = FunctionDefinition('foo', function)
 printer = PrettyPrinter()
 printer.visit(definition)
 
-
-
-
+reference = Reference('foo')
+call = FunctionCall(reference, [Number(1), Number(2), Number(3)])
+printer = PrettyPrinter()
+printer.visit(call)
