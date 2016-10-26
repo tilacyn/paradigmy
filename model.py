@@ -22,6 +22,9 @@ class Number:
     def evaluate(self, scope):
         return self
 
+    def accept(self, visitor):
+        return visitor.visit_number(self)
+
 
 class Function:
 
@@ -36,6 +39,9 @@ class Function:
             res = stmt.evaluate(scope)
         return res
 
+    def accept(self, visitor):
+        return visitor.visit_function(self)
+
 
 class FunctionDefinition:
 
@@ -46,6 +52,9 @@ class FunctionDefinition:
     def evaluate(self, scope):
         scope[self.name] = self.function
         return self.function
+
+    def accept(self, visitor):
+        return visitor.visit_f_def(self)
 
 
 class Conditional:
@@ -71,6 +80,9 @@ class Conditional:
                     res = stmt.evaluate(scope)
                 return res
 
+    def accept(self, visitor):
+        return visitor.visit_conditional(self)
+
 
 class Print:
 
@@ -82,6 +94,9 @@ class Print:
         print(print_number.value)
         return print_number
 
+    def accept(self, visitor):
+        return visitor.visit_print(self)
+
 
 class Read:
 
@@ -92,6 +107,9 @@ class Read:
         read_val = int(input())
         scope[self.name] = Number(read_val)
         return Number(read_val)
+
+    def accept(self, visitor):
+        return visitor.visit_read(self)
 
 
 class FunctionCall:
@@ -107,6 +125,9 @@ class FunctionCall:
             call_scope[arg_name] = arg_value.evaluate(scope)
         return function.evaluate(call_scope)
 
+    def accept(self, visitor):
+        return visitor.visit_f_call(self)
+
 
 class Reference:
 
@@ -115,6 +136,9 @@ class Reference:
 
     def evaluate(self, scope):
         return scope[self.name]
+
+    def accept(self, visitor):
+        return visitor.visit_ref(self)
 
 
 class BinaryOperation:
@@ -154,6 +178,9 @@ class BinaryOperation:
         if self.op == '!=':
             return Number(int(not lhs == rhs))
 
+    def accept(self, visitor):
+        return visitor.visit_bin_op(self)
+
 
 class UnaryOperation:
 
@@ -168,112 +195,5 @@ class UnaryOperation:
         if self.op == '!':
             return Number(int(not cur_val))
 
-
-def example():
-    parent = Scope()
-    parent['foo'] = Function(('hello', 'world'),
-                             [Print(BinaryOperation(Reference('hello'),
-                                                    '+',
-                                                    Reference('world')))])
-    parent['bar'] = Number(10)
-    scope = Scope(parent)
-    assert 10 == scope['bar'].value
-    scope['bar'] = Number(20)
-    assert scope['bar'].value == 20
-    print('It should print 2: ', end=' ')
-    FunctionCall(FunctionDefinition('foo', parent['foo']),
-                 [Number(5), UnaryOperation('-', Number(3))]).evaluate(scope)
-
-
-def example1():
-    print('It should read arg1')
-    print('It should print (int)(arg1 == 200):')
-    parent = Scope()
-    Read('arg1').evaluate(parent)
-    Print(Conditional(BinaryOperation(Reference('arg1'), '==', Number(200)),
-                      [Print(Number(1))], [Print(Number(0))]).evaluate(parent))
-
-
-def example2():
-    print('It should read arg1, arg2')
-    print('It should print arg1//arg2, arg1%arg2, (arg1//arg2)*(arg1%arg2):')
-    parent = Scope()
-    d = BinaryOperation(Reference('arg1'), '/', Reference('arg2'))
-    t = BinaryOperation(Reference('arg1'), '%', Reference('arg2'))
-    parent['/%'] = Function(('arg1', 'arg2'),
-                            [Print(d),  Print(t),
-                            Print(BinaryOperation(d, '*', t))])
-    Read('1').evaluate(parent)
-    Read('2').evaluate(parent)
-    FunctionCall(Reference('/%'), [parent['1'], parent['2']]).evaluate(parent)
-
-
-def example3():
-    print('It should print x-1, x-2, x-3, if x <= 5')
-    print('Otherwise it should print 1-x, 2-x, 3-x')
-    parent = Scope()
-    Read('arg1').evaluate(parent)
-    Conditional(BinaryOperation(Reference('arg1'), '>', Number(5)),
-                [Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
-                                                           '-', Number(1)))),
-                 Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
-                                                           '-', Number(2)))),
-                 Print(UnaryOperation('-', BinaryOperation(Reference('arg1'),
-                                                           '-', Number(3))))],
-                [Print(BinaryOperation(Reference('arg1'), '-', Number(1))),
-                 Print(BinaryOperation(Reference('arg1'), '-', Number(2))),
-                 Print(BinaryOperation(Reference('arg1'),
-                       '-', Number(3)))]).evaluate(parent)
-
-
-def example4():
-    print('It should print all the Binary operations')
-    parent = Scope()
-    parent['a1'] = Number(4)
-    parent['a2'] = Number(3)
-    assert Print(BinaryOperation(Reference('a1'), '+',
-                                 Reference('a2'))).evaluate(parent).value == 7
-    assert Print(BinaryOperation(Reference('a1'), '-',
-                                 Reference('a2'))).evaluate(parent).value == 1
-    assert Print(BinaryOperation(Reference('a1'), '*',
-                                 Reference('a2'))).evaluate(parent).value == 12
-    assert Print(BinaryOperation(Reference('a1'), '/',
-                                 Reference('a2'))).evaluate(parent).value == 1
-    assert Print(BinaryOperation(Reference('a1'), '>',
-                                 Reference('a2'))).evaluate(parent).value == 1
-    assert Print(BinaryOperation(Reference('a1'), '<',
-                                 Reference('a2'))).evaluate(parent).value == 0
-    assert Print(BinaryOperation(Reference('a1'), '>=',
-                                 Reference('a2'))).evaluate(parent).value == 1
-    assert Print(BinaryOperation(Reference('a1'), '<=',
-                                 Reference('a2'))).evaluate(parent).value == 0
-    assert Print(BinaryOperation(Reference('a1'), '&&',
-                                 Reference('a2'))).evaluate(parent).value == 3
-    assert Print(BinaryOperation(Reference('a1'), '||',
-                                 Reference('a2'))).evaluate(parent).value == 3
-    assert Print(BinaryOperation(Reference('a1'), '!=',
-                                 Reference('a2'))).evaluate(parent).value == 1
-    assert Print(BinaryOperation(Reference('a1'), '==',
-                                 Reference('a2'))).evaluate(parent).value == 0
-    assert Print(BinaryOperation(Reference('a1'), '%',
-                                 Reference('a2'))).evaluate(parent).value == 1
-
-
-def example5():
-    print('checks whether program is valid with None or empty args')
-    parent = Scope()
-    Function([Number(0)], []).evaluate(parent)
-    Function([Number(0)], None).evaluate(parent)
-    Conditional(Number(0), [], []).evaluate(parent)
-    Conditional(Number(0), None, None).evaluate(parent)
-    Conditional(Number(1), []).evaluate(parent)
-    Conditional(Number(1), None).evaluate(parent)
-
-
-if __name__ == '__main__':
-    example()
-    example1()
-    example2()
-    example3()
-    example4()
-    example5()
+    def accept(self, visitor):
+        return visitor.visit_un_op(self)
