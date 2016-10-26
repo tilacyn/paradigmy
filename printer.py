@@ -1,10 +1,9 @@
-from model import *
-from folder import *
+from yat.model import *
+from yat.folder import *
 
 
 def write_indent(n):
-    for i in range(0, n):
-        print('\t', end='')
+    print('\t' * n, end='')
 
 
 class PrettyPrinter:
@@ -28,17 +27,13 @@ class PrettyPrinter:
         self.a_printer.visit(tree.condition)
         print(') {', sep='', end='\n')
         self.cur_indent += 1
-        if not tree.if_true:
-            pass
-        else:
+        if tree.if_true:
             for sentence in tree.if_true:
                 write_indent(self.cur_indent)
                 self.visit(sentence)
         write_indent(self.cur_indent - 1)
         print('}', 'else', '{', end='\n')
-        if not tree.if_false:
-            pass
-        else:
+        if tree.if_false:
             for sentence in tree.if_false:
                 write_indent(self.cur_indent)
                 self.visit(sentence)
@@ -54,7 +49,7 @@ class PrettyPrinter:
         print('def', tree.name, sep=' ', end='')
         print('(', end='')
         for i, args in enumerate(tree.function.args):
-            self.a_printer.visit(args)
+            print(args, end='')
             if i < len(tree.function.args) - 1:
                 print(', ', end='')
         print(') {', end='\n')
