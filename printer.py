@@ -1,5 +1,5 @@
-from yat.model import *
-from yat.folder import *
+from model import *
+from folder import *
 
 
 def write_indent(n):
@@ -16,10 +16,12 @@ class PrettyPrinter:
         tree.accept(self)
 
     def visit_number(self, tree):
-        print(tree.value, end=';\n')
+        self.a_printer.visit(tree)
+        print(end=';\n')
 
     def visit_ref(self, tree):
         self.a_printer.visit(tree)
+        print(';')
 
     def visit_conditional(self, tree):
         write_indent(self.cur_indent - 1)
@@ -46,13 +48,8 @@ class PrettyPrinter:
         print(end=';\n')
 
     def visit_f_def(self, tree):
-        print('def', tree.name, sep=' ', end='')
-        print('(', end='')
-        for i, args in enumerate(tree.function.args):
-            print(args, end='')
-            if i < len(tree.function.args) - 1:
-                print(', ', end='')
-        print(') {', end='\n')
+        print('def ', tree.name, '(',
+              ', '.join(tree.function.args), ') {', sep='')
         self.cur_indent += 1
         for sentence in tree.function.body:
             write_indent(self.cur_indent)
