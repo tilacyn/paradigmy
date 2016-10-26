@@ -1,5 +1,5 @@
-from model import *
-from folder import *
+from yat.model import *
+from yat.folder import *
 
 cur_tab = 0
 
