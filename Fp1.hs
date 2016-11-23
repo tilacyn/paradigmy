@@ -16,7 +16,7 @@ drop' 0 xs = xs
 drop' n (_:xs) = drop' (n - 1) xs
 
 filter' :: (a -> Bool) -> [a] -> [a]
-filter' func [] = []
+filter' _ [] = []
 filter' func (x:xs) | func x    = x:filter' func xs
                     | otherwise = filter' func xs
 
