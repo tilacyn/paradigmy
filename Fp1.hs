@@ -1,30 +1,29 @@
 head' :: [a] -> a
-head' (x:xs) = x
+head' (x:_) = x
 
 tail' :: [a] -> [a]
-tail' (x:xs) = xs
+tail' [] = []
+tail' (_:xs) = xs
 
 take' :: Int -> [a] -> [a]
-take' x [] = []
-take' 0 xs = []
+take' _ [] = []
+take' 0 _ = []
 take' n (x:xs) = x:take' (n - 1) xs
 
 drop' :: Int -> [a] -> [a]
-drop' x [] = []
+drop' _ [] = []
 drop' 0 xs = xs
-drop' n (x:xs) = drop' (n - 1) xs
+drop' n (_:xs) = drop' (n - 1) xs
 
 filter' :: (a -> Bool) -> [a] -> [a]
 filter' func [] = []
-filter' func xs | func (head' xs) = (head' xs):filter' func (tail' xs)
-                    | otherwise =  filter' func (tail' xs)
+filter' func (x:xs) | func x    = x:filter' func xs
+                    | otherwise = filter' func xs
 
 foldl' :: (a -> b -> a) -> a -> [b] -> a
-foldl' f z [] = z
-foldl' f z l = foldl' f (f z (head' l)) (tail' l)
+foldl' _ z [] = z
+foldl' f z (x:xs) = foldl' f (f z x) xs
 
 concat' :: [a] -> [a] -> [a]
-concat' [] [] = []
-concat' [] (l2) = (head' l2):concat' [] (tail' l2)
-concat' l1 l2 = (head' l1):concat' (tail' l1) l2
-
+concat' [] ys = ys
+concat' (x:xs) ys = x:concat' xs ys
