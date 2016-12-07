@@ -24,5 +24,4 @@ delete k (Node key val left right)
 
 merge :: BinaryTree k v -> BinaryTree k v -> BinaryTree k v
 merge EmptyTree right = right
-merge left EmptyTree = left
-merge (Node k v lleft lright) right = Node k v lleft (merge lright right)
+merge (Node k v l r) other = Node k v l (merge r other)
