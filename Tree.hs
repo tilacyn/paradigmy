@@ -20,11 +20,9 @@ delete k EmptyTree = EmptyTree
 delete k (Node key val left right)
     | k < key = Node key val (delete k left) right
     | k > key = Node key val left (delete k right)
-delete k (Node key val EmptyTree right)
-    | k == key = right
-delete k (Node key val left EmptyTree)
-    | k == key = left
-delete k (Node key val left (Node kr vr EmptyTree rright))
-    | k == key = Node kr vr left rright
-delete k (Node key val left (Node kr vr (Node krl vrl rlleft rlright) rright))
-    | k == key = Node krl vrl left (Node kr vr (delete krl (Node krl vrl rlleft rlright)) rright)
+    | k == key = merge left right
+
+merge :: BinaryTree k v -> BinaryTree k v -> BinaryTree k v
+merge EmptyTree right = right
+merge left EmptyTree = left
+merge (Node k v lleft lright) right = Node k v lleft (merge lright right)
