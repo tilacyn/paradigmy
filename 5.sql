@@ -1,0 +1,1 @@
+SELECT GovernmentForm FROM Country group by GovernmentForm order by SUM (SurfaceArea) DESC LIMIT 1;
