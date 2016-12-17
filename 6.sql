@@ -1,3 +1,3 @@
-SELECT Name, City.Population,
-(SELECT Population FROM Country WHERE City.CountryCode = Country.Code) AS Country_Population
-FROM City ORDER BY (CAST (City.Population AS DOUBLE) / (SELECT CAST (Country.Population AS DOUBLE) FROM Country WHERE City.CountryCode = Country.Code)) DESC LIMIT 20;
+SELECT City.Name, City.Population AS City_Population, Country.Population AS Country_Population
+FROM City JOIN Country ON Country.Code = City.CountryCode
+ORDER BY (CAST (City.Population AS DOUBLE) / CAST(Country.Population AS DOUBLE)) DESC;
