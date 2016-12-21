@@ -1,5 +1,5 @@
-import model_kek
-from model_kek import *
+import model
+from model import *
 import sys
 from io import StringIO
 import pytest
