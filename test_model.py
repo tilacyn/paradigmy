@@ -1,8 +1,8 @@
-import model
 from model import *
-import sys
 from io import StringIO
+import sys
 import pytest
+
 
 BinOp = BinaryOperation
 Num = Number
@@ -20,51 +20,52 @@ def val(num):
 class TestScope:
     def test_setitem(self):
         parent = Scope()
-        NumObj = Num(1)
-        parent["foo"] = NumObj
-        assert parent["foo"] == NumObj
+        num = Num(1)
+        parent["foo"] = num
+        assert parent["foo"] == num
 
     def test_setitem_par(self):
         parent = Scope()
         scope = Scope(parent)
-        NumObj = Num(1)
-        parent["foo"] = NumObj
-        assert scope["foo"] == NumObj
+        num = Num(1)
+        parent["foo"] = num
+        assert scope["foo"] == num
 
 
 class TestNum:
     def test_eval(self):
         parent = Scope()
-        NumObj = Num(1)
-        assert NumObj.evaluate(parent) is NumObj
+        num = Num(1)
+        assert num.evaluate(parent) is num
 
     def test_value(self):
         parent = Scope()
-        NumObj = Num(1)
-        assert val(NumObj) == 1
+        num = Num(1)
+        assert val(num) == 1
 
 
 class TestFunction:
-    def test_eval_simple(self):
+    def test_eval_simple(self, monkeypatch):
+        monkeypatch.setattr(sys, "stdout", StringIO())
         scope = Scope()
         scope['hullo'] = Num(99)
         scope['goodbye'] = Num(55)
-        f = Function([Reference('hullo'), Reference('goodbye')],
-                     [BinOp(Reference('hullo'), '-', Reference('goodbye'))])
-        assert val(f.evaluate(scope)) == 44
+        f = Function(['hullo', 'goodbye'],
+                     [Print(Num(99))])
+        f.evaluate(scope)
+        assert sys.stdout.getvalue() == '99\n'
 
     def test_empty_args(self):
         scope = Scope()
-        f = Function([], [BinOp(Num(5), '-', Num(17)),
-                          BinOp(Num(5), '+', Num(17))])
+        f = Function([], [Num(17), Num(22)])
         assert val(f.evaluate(scope)) == 22
 
     def test_empty_body(self):
         scope = Scope()
         scope['arg1'] = Num(22)
         scope['arg2'] = Num(33)
-        f = Function([Reference('arg1'), Reference('arg2')], [])
-        assert f.evaluate(scope)
+        f = Function(['arg1', 'arg2'], [])
+        f.evaluate(scope)
 
     def test_eval_all_body(self, monkeypatch):
         scope = Scope()
@@ -74,12 +75,12 @@ class TestFunction:
         assert sys.stdout.getvalue() == '9\n1\n22\n'
 
 
-class TestFunDef:
+class TestFunctionDefinition:
     def test_definition(self):
         scope = Scope()
         scope['hullo'] = Num(99)
         scope['goodbye'] = Num(55)
-        f = Function([Reference('hullo'), Reference('goodbye')],
+        f = Function(['hullo', 'goodbye'],
                      [BinOp(Reference('hullo'), '-', Reference('goodbye'))])
         fdef = FunctionDefinition('f', f).evaluate(scope)
         assert fdef is f
@@ -88,20 +89,16 @@ class TestFunDef:
 class TestUnaryOp:
     def test_minus(self):
         scope = Scope()
-        scope['hullo'] = Num(99)
-        scope['goodbye'] = Num(-53)
-        un_op = UnaryOperation('-', Reference('hullo'))
+        un_op = UnaryOperation('-', Num(99))
         assert val(un_op.evaluate(scope)) == -99
-        un_op = UnaryOperation('-', Reference('goodbye'))
+        un_op = UnaryOperation('-', Num(-53))
         assert val(un_op.evaluate(scope)) == 53
 
     def test_not(self):
         scope = Scope()
-        scope['hullo'] = Num(34)
-        scope['goodbye'] = Num(0)
-        un_op = UnaryOperation('!', Reference('hullo'))
+        un_op = UnaryOperation('!', Num(34))
         assert val(un_op.evaluate(scope)) == 0
-        un_op = UnaryOperation('!', Reference('goodbye'))
+        un_op = UnaryOperation('!', Num(0))
         assert val(un_op.evaluate(scope)) != 0
 
     def test_complicated(self):
@@ -111,36 +108,70 @@ class TestUnaryOp:
 
 
 class TestBinOp:
-    def test_all(self):
+    def test_plus(self):
         parent = Scope()
-        parent['a1'] = Num(4)
-        parent['a2'] = Num(3)
-        assert val(BinOp(Reference('a1'), '+',
-                         Reference('a2')).evaluate(parent)) == 7
-        assert val(BinOp(Reference('a1'), '-',
-                         Reference('a2')).evaluate(parent)) == 1
-        assert val(BinOp(Reference('a1'), '*',
-                         Reference('a2')).evaluate(parent)) == 12
-        assert val(BinOp(Reference('a1'), '/',
-                         Reference('a2')).evaluate(parent)) == 1
-        assert val(BinOp(Reference('a1'), '>',
-                         Reference('a2')).evaluate(parent)) != 0
-        assert val(BinOp(Reference('a1'), '<',
-                         Reference('a2')).evaluate(parent)) == 0
-        assert val(BinOp(Reference('a1'), '>=',
-                         Reference('a2')).evaluate(parent)) != 0
-        assert val(BinOp(Reference('a1'), '<=',
-                         Reference('a2')).evaluate(parent)) == 0
-        assert val(BinOp(Reference('a1'), '&&',
-                         Reference('a2')).evaluate(parent)) != 0
-        assert val(BinOp(Reference('a1'), '||',
-                         Reference('a2')).evaluate(parent)) != 0
-        assert val(BinOp(Reference('a1'), '!=',
-                         Reference('a2')).evaluate(parent)) != 0
-        assert val(BinOp(Reference('a1'), '==',
-                         Reference('a2')).evaluate(parent)) == 0
-        assert val(BinOp(Reference('a1'), '%',
-                         Reference('a2')).evaluate(parent)) == 1
+        assert val(BinOp(Num(4), '+',
+                         Num(3)).evaluate(parent)) == 7
+
+    def test_minus(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '-',
+                         Num(3)).evaluate(parent)) == 1
+
+    def test_product(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '*',
+                         Num(3)).evaluate(parent)) == 12
+
+    def test_divide(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '/',
+                         Num(3)).evaluate(parent)) == 1
+
+    def test_more(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '>',
+                         Num(3)).evaluate(parent)) != 0
+
+    def test_less(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '<',
+                         Num(3)).evaluate(parent)) == 0
+
+    def test_geq(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '>=',
+                         Num(3)).evaluate(parent)) != 0
+
+    def test_leq(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '<=',
+                         Num(3)).evaluate(parent)) == 0
+
+    def test_and(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '&&',
+                         Num(3)).evaluate(parent)) != 0
+
+    def test_or(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '||',
+                         Num(3)).evaluate(parent)) != 0
+
+    def test_neq(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '!=',
+                         Num(3)).evaluate(parent)) != 0
+
+    def test_eq(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '==',
+                         Num(3)).evaluate(parent)) == 0
+
+    def test_percent(self):
+        parent = Scope()
+        assert val(BinOp(Num(4), '%',
+                         Num(3)).evaluate(parent)) == 1
 
     def test_complicated(self):
         scope = Scope()
@@ -192,10 +223,10 @@ class TestFunctionCall:
 class TestReference:
     def test_simple(self):
         scope = Scope()
-        NumObj = Num(123)
-        scope['hullo'] = NumObj
+        num = Num(123)
+        scope['hullo'] = num
         assert Reference('hullo').evaluate(scope) is scope['hullo']
-        assert Reference('hullo').evaluate(scope) is NumObj
+        assert Reference('hullo').evaluate(scope) is num
 
     def test_function(self):
         parent = Scope()
@@ -212,11 +243,8 @@ class TestConditional:
         scope = Scope()
         scope['key'] = Num(0)
         cond = Conditional(UnaryOperation('!', Reference('key')),
-                           [BinOp(Num(0), '%', Num(2)),
-                            BinOp(Num(3), '/', Num(-3)),
-                            BinOp(Num(-2), '*', Num(99))],
-                           [BinOp(Num(5), '+', Num(4)),
-                            BinOp(Num(2), '+', Num(1))])
+                           [Num(9), Num(55), Num(-198)],
+                           [Num(9), Num(3)])
         assert val(cond.evaluate(scope)) == -198
         scope['key'] = Num(1)
         assert val(cond.evaluate(scope)) == 3
@@ -225,9 +253,8 @@ class TestConditional:
         scope = Scope()
         scope['key'] = Num(0)
         cond = Conditional(UnaryOperation('!', Reference('key')), None,
-                           [BinOp(Num(5), '+', Num(4)),
-                            BinOp(Num(2), '+', Num(1))])
-        assert cond.evaluate(scope)
+                           [Num(9), Num(3)])
+        cond.evaluate(scope)
         scope['key'] = Num(1)
         assert val(cond.evaluate(scope)) == 3
 
@@ -235,9 +262,8 @@ class TestConditional:
         scope = Scope()
         scope['key'] = Num(0)
         cond = Conditional(UnaryOperation('!', Reference('key')), [],
-                           [BinOp(Num(5), '+', Num(4)),
-                            BinOp(Num(2), '+', Num(1))])
-        assert cond.evaluate(scope)
+                           [Num(9), Num(3)])
+        cond.evaluate(scope)
         scope['key'] = Num(1)
         assert val(cond.evaluate(scope)) == 3
 
@@ -249,27 +275,25 @@ class TestConditional:
                             BinOp(Num(2), '+', Num(1))], None)
         assert val(cond.evaluate(scope)) == 3
         scope['key'] = Num(1)
-        assert cond.evaluate(scope)
+        cond.evaluate(scope)
 
     def test_if_false_no(self):
         scope = Scope()
         scope['key'] = Num(0)
         cond = Conditional(UnaryOperation('!', Reference('key')),
-                           [BinOp(Num(5), '+', Num(4)),
-                            BinOp(Num(2), '+', Num(1))])
+                           [Num(877), Num(3)])
         assert val(cond.evaluate(scope)) == 3
         scope['key'] = Num(1)
-        assert cond.evaluate(scope)
+        cond.evaluate(scope)
 
     def test_if_false_empty(self):
         scope = Scope()
         scope['key'] = Num(0)
         cond = Conditional(UnaryOperation('!', Reference('key')),
-                           [BinOp(Num(5), '+', Num(4)),
-                            BinOp(Num(2), '+', Num(1))], [])
+                           [Num(333), Num(3)], [])
         assert val(cond.evaluate(scope)) == 3
         scope['key'] = Num(1)
-        assert cond.evaluate(scope)
+        cond.evaluate(scope)
 
     def test_all_body(self, monkeypatch):
         scope = Scope()
@@ -298,8 +322,8 @@ class TestRead:
 
 class TestPrint:
     def test_simple(self):
-        NumObj = Num(22)
-        assert val(NumObj) == 22
+        num = Num(22)
+        assert val(num) == 22
 
     def test_complicated(self):
         scope = Scope()
@@ -324,3 +348,16 @@ class TestMulti:
                      Print(BinOp(Reference('arg1'),
                            '-', Num(3)))]).evaluate(parent)
         assert sys.stdout.getvalue() == '-9\n-8\n-7\n'
+
+    def test_cond_ref_binop(self):
+        scope = Scope()
+        scope['key'] = Num(0)
+        cond = Conditional(UnaryOperation('!', Reference('key')),
+                           [BinOp(Num(0), '%', Num(2)),
+                            BinOp(Num(3), '/', Num(-3)),
+                            BinOp(Num(-2), '*', Num(99))],
+                           [BinOp(Num(5), '+', Num(4)),
+                            BinOp(Num(2), '+', Num(1))])
+        assert val(cond.evaluate(scope)) == -198
+        scope['key'] = Num(1)
+        assert val(cond.evaluate(scope)) == 3
