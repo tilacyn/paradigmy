@@ -1,2 +1,3 @@
-SELECT Name, (SELECT COUNT (*) FROM City WHERE CountryCode =
-Code AND City.Population >= 1000000) AS Millioniki FROM Country ORDER BY Millioniki DESC, Name;
+SELECT Country.Name, COALESCE(SUM(City.Population >= 1000000), 0) AS Millionniki 
+FROM Country LEFT JOIN City ON City.CountryCode = Country.Code
+GROUP BY Country.Name ORDER BY Millionniki DESC;
