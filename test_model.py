@@ -1,7 +1,6 @@
 from model import *
 from io import StringIO
 import sys
-import pytest
 
 
 BinOp = BinaryOperation
@@ -21,15 +20,15 @@ class TestScope:
     def test_setitem(self):
         parent = Scope()
         num = Num(1)
-        parent["foo"] = num
-        assert parent["foo"] == num
+        parent['foo'] = num
+        assert parent['foo'] is num
 
     def test_setitem_par(self):
         parent = Scope()
         scope = Scope(parent)
         num = Num(1)
-        parent["foo"] = num
-        assert scope["foo"] == num
+        parent['foo'] = num
+        assert scope['foo'] is num
 
 
 class TestNum:
@@ -46,7 +45,7 @@ class TestNum:
 
 class TestFunction:
     def test_eval_simple(self, monkeypatch):
-        monkeypatch.setattr(sys, "stdout", StringIO())
+        monkeypatch.setattr(sys, 'stdout', StringIO())
         scope = Scope()
         scope['hullo'] = Num(99)
         scope['goodbye'] = Num(55)
@@ -69,7 +68,7 @@ class TestFunction:
 
     def test_eval_all_body(self, monkeypatch):
         scope = Scope()
-        monkeypatch.setattr(sys, "stdout", StringIO())
+        monkeypatch.setattr(sys, 'stdout', StringIO())
         f = Function([], [Print(Num(9)), Print(Num(1)), Print(Num(22))])
         f.evaluate(scope)
         assert sys.stdout.getvalue() == '9\n1\n22\n'
@@ -327,8 +326,8 @@ class TestPrint:
 
     def test_complicated(self):
         scope = Scope()
-        PrintObj = Print(BinOp(Num(6), '/', Num(3))).evaluate(scope)
-        assert val(PrintObj) == 2
+        print_obj = Print(BinOp(Num(6), '/', Num(3))).evaluate(scope)
+        assert val(print_obj) == 2
 
 
 class TestMulti:
