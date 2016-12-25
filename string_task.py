@@ -46,6 +46,6 @@ def tokenize(s):
             res[-1] += s[in_open + 1:in_close] + s[in_close + 1:]
             i = len(s)
             break
-    if(i != len(s)):
+    if i != len(s):
         res.extend(s[i:].split(' '))
     return res
