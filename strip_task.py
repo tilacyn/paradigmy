@@ -1,8 +1,7 @@
 def strip(inname, outname):
-    fin = open(inname, 'r')
-    fout = open(outname, 'w')
-    for line in fin:
-        if(line.find('[strip]') == -1):
-            fout.write(line)
+    with open(inname, 'r') as fin, open(outname, 'w') as fout:
+        for line in fin:
+            if '[strip]' not in line:
+                print(line, file=fout, end='')
     fin.close()
     fout.close()
