@@ -1,35 +1,27 @@
 def average(lst):
-    sum = 0
-    for val in lst:
-        sum += val
-    return sum // len(lst)
+    return sum(lst) / len(lst)
 
 
 def averages_row(mat):
-    av_lst = []
-    for lst in mat:
-        av_lst.append(average(lst))
-    return av_lst
+    return list(map(lambda lst: average(lst), mat))
 
 
 def find_min_pos(mat):
-    minx = -1
-    miny = -1
-    min = 200
-    for lst in mat:
-        for val in lst:
+    minx = 0
+    miny = 0
+    min = mat[0][0]
+    for i, lst in enumerate(mat):
+        for j, val in enumerate(lst):
             if val < min:
                 min = val
-                minx = mat.index(lst)
-                miny = lst.index(val)
-    return (minx, miny,)
+                minx = i
+                miny = j
+    return minx, miny
 
 
 def unique(lst):
-    unique_lst = []
-    i = 0
+    used = set()
     for val in lst:
-        if i == lst.index(val):
-            unique_lst.append(val)
-        i += 1
-    return unique_lst
+        if val not in used:
+            used.add(val)
+    return list(used)
