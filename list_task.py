@@ -3,7 +3,7 @@ def average(lst):
 
 
 def averages_row(mat):
-    return list(map(lambda lst: average(lst), mat))
+    return list(map(average, mat))
 
 
 def find_min_pos(mat):
@@ -21,7 +21,9 @@ def find_min_pos(mat):
 
 def unique(lst):
     used = set()
+    res = []
     for val in lst:
         if val not in used:
             used.add(val)
-    return list(used)
+            res.append(val)
+    return res
